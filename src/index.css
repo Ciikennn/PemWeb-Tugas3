@@ -346,3 +346,25 @@ input {
     width: 100%;
   }
 }
+
+/* ---------- Status API ---------- */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.load-error {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-radius: var(--radius);
+}
+
+.load-error p {
+  margin: 0 0 12px;
+}
+
+.submit-error {
+  margin: 16px 0 0;
+}

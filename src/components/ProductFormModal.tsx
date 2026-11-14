@@ -5,7 +5,7 @@ import Modal from './Modal'
 interface ProductFormModalProps {
   /** Jika diisi, modal dalam mode Edit. Jika kosong, mode Tambah. */
   product?: Product
-  onSubmit: (input: ProductInput) => void
+  onSubmit: (input: ProductInput) => Promise<void>
   onClose: () => void
 }
 
@@ -19,8 +19,10 @@ export default function ProductFormModal({ product, onSubmit, onClose }: Product
   const [name, setName] = useState(product?.name ?? '')
   const [price, setPrice] = useState(product ? String(product.price) : '')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const trimmedName = name.trim()
     const priceNumber = Number(price)
@@ -34,7 +36,14 @@ export default function ProductFormModal({ product, onSubmit, onClose }: Product
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
-    onSubmit({ name: trimmedName, price: priceNumber })
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      await onSubmit({ name: trimmedName, price: priceNumber })
+    } catch (err) {
+      setSubmitError((err as Error).message)
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -77,12 +86,18 @@ export default function ProductFormModal({ product, onSubmit, onClose }: Product
           <small className={errors.price ? 'error' : 'hint'}>Harga harus lebih dari 0.</small>
         </div>
 
+        {submitError && (
+          <p className="error submit-error" role="alert">
+            {submitError}
+          </p>
+        )}
+
         <div className="modal-actions">
-          <button type="button" className="btn btn-outline" onClick={onClose}>
+          <button type="button" className="btn btn-outline" onClick={onClose} disabled={submitting}>
             Batal
           </button>
-          <button type="submit" className="btn btn-primary">
-            {isEdit ? 'Simpan Perubahan' : 'Simpan Produk'}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Simpan Produk'}
           </button>
         </div>
       </form>
