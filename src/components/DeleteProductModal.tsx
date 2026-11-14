@@ -1,14 +1,29 @@
+import { useState } from 'react'
 import type { Product } from '../types'
 import { formatRupiah } from '../utils/formatRupiah'
 import Modal from './Modal'
 
 interface DeleteProductModalProps {
   product: Product
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   onClose: () => void
 }
 
 export default function DeleteProductModal({ product, onConfirm, onClose }: DeleteProductModalProps) {
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleConfirm = async () => {
+    setDeleting(true)
+    setError('')
+    try {
+      await onConfirm()
+    } catch (err) {
+      setError((err as Error).message)
+      setDeleting(false)
+    }
+  }
+
   return (
     <Modal onClose={onClose} labelledBy="delete-title">
       <div className="delete-head">
@@ -30,12 +45,18 @@ export default function DeleteProductModal({ product, onConfirm, onClose }: Dele
         <p className="card-price">{formatRupiah(product.price)}</p>
       </div>
 
+      {error && (
+        <p className="error submit-error" role="alert">
+          {error}
+        </p>
+      )}
+
       <div className="modal-actions">
-        <button type="button" className="btn btn-outline" onClick={onClose}>
+        <button type="button" className="btn btn-outline" onClick={onClose} disabled={deleting}>
           Batal
         </button>
-        <button type="button" className="btn btn-danger" onClick={onConfirm}>
-          Hapus Produk
+        <button type="button" className="btn btn-danger" onClick={handleConfirm} disabled={deleting}>
+          {deleting ? 'Menghapus...' : 'Hapus Produk'}
         </button>
       </div>
     </Modal>
