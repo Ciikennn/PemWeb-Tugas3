@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router'
-import Navbar from '../organisms/Navbar'
+import Navbar from '../../organisms/Navbar'
 
-export default function MainLayout() {
+export default function PageLayout() {
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
