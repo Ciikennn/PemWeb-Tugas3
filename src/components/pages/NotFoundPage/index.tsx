@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router'
-import { ButtonLink } from '../components/atoms/Button'
+import { ButtonLink } from '../../atoms/Button'
 
 export default function NotFoundPage() {
   const { pathname } = useLocation()
@@ -14,7 +14,7 @@ export default function NotFoundPage() {
       </p>
       <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
         <ButtonLink to="/">Ke Halaman Utama</ButtonLink>
-        <ButtonLink to="/products" variant="outline">
+        <ButtonLink to="/products" variant="secondary">
           Ke Daftar Produk
         </ButtonLink>
       </div>

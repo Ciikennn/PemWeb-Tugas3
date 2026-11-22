@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import type { Product, ProductInput } from '../types'
-import * as productApi from '../api/products'
-import { ApiError } from '../api/products'
-import Button, { ButtonLink } from '../components/atoms/Button'
-import Price from '../components/atoms/Price'
-import StatusMessage from '../components/molecules/StatusMessage'
-import ProductFormModal from '../components/organisms/ProductFormModal'
-import DeleteProductModal from '../components/organisms/DeleteProductModal'
+import type { Product, ProductValues } from '../../../types/product'
+import { ApiError, productRepository } from '../../../data/product'
+import Button, { ButtonLink } from '../../atoms/Button'
+import Price from '../../atoms/Price'
+import StatusMessage from '../../molecules/StatusMessage'
+import ProductFormModal from '../../organisms/ProductFormModal'
+import DeleteProductModal from '../../organisms/DeleteProductModal'
 
 type State =
   | { status: 'loading' }
@@ -31,12 +30,13 @@ export default function ProductDetailPage() {
     }
     setState({ status: 'loading' })
     try {
-      setState({ status: 'ready', product: await productApi.getProductById(productId) })
+      const model = await productRepository.getProductDetail(productId)
+      setState({ status: 'ready', product: model.toJSON() })
     } catch (err) {
       if (err instanceof ApiError && (err.status === 404 || err.status === 400)) {
         setState({ status: 'not-found' })
       } else {
-        setState({ status: 'error', message: (err as Error).message })
+        setState({ status: 'error', message: err instanceof Error ? err.message : 'Gagal memuat produk.' })
       }
     }
   }, [productId, validId])
@@ -45,20 +45,20 @@ export default function ProductDetailPage() {
     loadProduct()
   }, [loadProduct])
 
-  const handleEdit = async (input: ProductInput) => {
-    const updated = await productApi.updateProduct(productId, input)
-    setState({ status: 'ready', product: updated })
+  const handleEdit = async (values: ProductValues) => {
+    const updated = await productRepository.updateProduct(productId, values)
+    setState({ status: 'ready', product: updated.toJSON() })
     setModal('none')
   }
 
   const handleDelete = async () => {
-    await productApi.deleteProduct(productId)
+    await productRepository.deleteProduct(productId)
     navigate('/products', { replace: true })
   }
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-slate-500">
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm">
         <Link to="/products" className="font-medium text-primary hover:underline">
           ← Kembali ke daftar produk
         </Link>
@@ -71,7 +71,7 @@ export default function ProductDetailPage() {
           variant="error"
           message={state.message}
           action={
-            <Button variant="outline" size="sm" onClick={loadProduct}>
+            <Button variant="secondary" size="sm" onClick={loadProduct}>
               Coba Lagi
             </Button>
           }
@@ -80,11 +80,12 @@ export default function ProductDetailPage() {
 
       {state.status === 'not-found' && (
         <section className="rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-          <p className="text-5xl" aria-hidden="true">🔍</p>
+          <p className="text-5xl" aria-hidden="true">
+            🔍
+          </p>
           <h1 className="mt-4 text-2xl font-bold">Produk tidak ditemukan</h1>
           <p className="mt-2 text-slate-600">
-            Produk dengan ID <span className="font-semibold text-slate-900">"{id}"</span> tidak ada atau sudah
-            dihapus.
+            Produk dengan ID <span className="font-semibold text-slate-900">"{id}"</span> tidak ada atau sudah dihapus.
           </p>
           <ButtonLink to="/products" className="mt-6">
             Kembali ke Daftar Produk
@@ -114,10 +115,10 @@ export default function ProductDetailPage() {
           </dl>
 
           <div className="mt-8 flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={() => setModal('edit')} className="sm:w-32">
+            <Button variant="secondary" onClick={() => setModal('edit')} className="sm:w-32">
               Edit
             </Button>
-            <Button variant="outline-danger" onClick={() => setModal('delete')} className="sm:w-32">
+            <Button variant="subtleDanger" onClick={() => setModal('delete')} className="sm:w-32">
               Hapus
             </Button>
           </div>
