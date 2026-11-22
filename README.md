@@ -1,59 +1,57 @@
 # Manajemen Produk – Frontend
 
-Aplikasi React + TypeScript (Vite) untuk mengelola daftar produk dan harga.
-Menggunakan **React Router** untuk navigasi, **Tailwind CSS** untuk tampilan, dan terhubung ke
-backend Express ([PemWeb-Tugas3-BE](https://github.com/Ciikennn/PemWeb-Tugas3-BE)) melalui REST API `/api/products`.
+Aplikasi React + TypeScript (Vite) dengan **React Router** dan **Tailwind CSS**, mengikuti struktur
+[react-template](https://github.com/anasmcfudy/react-template) (Atomic Design). Data produk diambil dan
+disimpan melalui backend Express ([PemWeb-Tugas3-BE](https://github.com/Ciikennn/PemWeb-Tugas3-BE)).
 
 ## Fitur
-- Daftar produk dengan pencarian berdasarkan nama
-- Tambah, edit, dan hapus produk melalui pop-up (data tersimpan lewat API)
+- Daftar produk, pencarian, tambah, edit, dan hapus (data dari backend)
 - Halaman detail produk `/products/:id` dengan link kembali ke daftar
-- Pesan "Produk tidak ditemukan" jika ID tidak ada
+- Pesan jelas jika produk tidak ditemukan
 - Halaman 404 untuk URL yang tidak terdaftar
-- Tampilan responsif (HP, tablet, desktop)
+- Tampilan responsif dengan Tailwind CSS
 
-## Halaman (Routes)
-| Path | Halaman |
+## Halaman
+| URL | Halaman |
 |---|---|
 | `/` | Beranda |
 | `/products` | Daftar produk |
 | `/products/:id` | Detail produk |
-| `*` | 404 – Halaman tidak ditemukan |
+| URL lain | Halaman 404 |
 
 ## Menjalankan
+1. Jalankan backend (lihat README repo backend) di http://localhost:4000
+2. Jalankan frontend
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Buka http://localhost:5173
+3. (Opsional) jika URL backend berbeda, salin `.env.example` menjadi `.env` lalu ubah `VITE_API_BASE_URL`
 
-### 1. Backend
-```bash
-git clone https://github.com/Ciikennn/PemWeb-Tugas3-BE.git
-cd PemWeb-Tugas3-BE
-npm install
-cp .env.example .env    # isi DATABASE_URL & DIRECT_URL (Neon)
-npx prisma generate
-npx prisma migrate dev
-npm run seed
-npm run dev             # http://localhost:4000
+## Struktur
 ```
-
-### 2. Frontend
-```bash
-npm install
-npm run dev             # http://localhost:5173
-```
-Jika backend berjalan di alamat lain, salin `.env.example` menjadi `.env` lalu ubah `VITE_API_URL`.
-
-## Struktur (Atomic Design)
-```
+app/                         # entry & routing (seperti template)
+├── entry.tsx
+├── routes.tsx
+├── globals.css
+├── page.tsx                 # /
+├── products/page.tsx        # /products
+├── products/[id]/page.tsx   # /products/:id
+└── not-found/page.tsx       # 404
 src/
-├── api/products.ts          # pemanggilan REST API backend
 ├── components/
-│   ├── atoms/               # Button, Input, Label, Price, Spinner
-│   ├── molecules/           # FormField, SearchBar, ProductInfo, Modal, StatusMessage
-│   ├── organisms/           # Navbar, ProductCard, ProductGrid, ProductFormModal, DeleteProductModal
-│   └── templates/           # MainLayout (Navbar + konten + footer)
-├── pages/                   # HomePage, ProductListPage, ProductDetailPage, NotFoundPage
-├── routes/index.tsx         # konfigurasi React Router
-├── types.ts
-├── utils/formatRupiah.ts
-├── index.css                # Tailwind CSS + tema warna
-└── main.tsx
+│   ├── atoms/        Button, Input, Label, Price, Spinner
+│   ├── molecules/    FormField, Modal, ProductCard, ProductInfo, SearchBar, StatusMessage
+│   ├── organisms/    Navbar, ProductGrid, ProductFormModal, DeleteProductModal
+│   ├── templates/    PageLayout
+│   └── pages/        RootPage, ProductsPage, ProductDetailPage, NotFoundPage
+├── data/product/
+│   ├── model/        product-model.ts       (validasi response)
+│   ├── param/        product-list-param.ts  (query parameter)
+│   ├── repository/   product-repository.ts  (payload → model)
+│   └── source/       product-remote.ts      (request HTTP)
+├── styles/           themes.style.css
+├── types/            product.ts
+└── utils/            formatRupiah.ts
 ```
